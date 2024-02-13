@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Calculator</title>
+  <link rel="shortcut icon" type="image/x-icon" href="/NewDataAggragator/images/logo-white.png"/>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: gray;
+      text-align: center;
+      margin: 50px;
+    }
+
+    #calculator {
+      background-color: lightblue;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      margin: auto;
+    }
+
+    #assetList, #avgPricesList {
+      text-align: left;
+      margin-top: 20px;
+    }
+
+    #assetList p, #avgPricesList p {
+      margin: 5px 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="calculator">
+
+  <h2>Average Price Calculator</h2>
+  <label for="avgAssetName">Asset Name:</label>
+  <input type="text" id="avgAssetName" placeholder="Enter asset name">
+
+  <label for="avgPrice">Price:</label>
+  <input type="number" id="avgPrice" placeholder="Enter price">
+
+  <button onclick="calculateAveragePrice()">Add Asset</button>
+  <button onclick="resetAverageCalculator()">Reset</button>
+
+  <div id="avgResult" style="margin-top: 20px;"></div>
+  <div id="assetList"></div>
+  <div id="avgPricesList"></div>
+
+
+  <h2>Asset Market Cap Calculator</h2>
+  <label for="assetName">Asset Name:</label>
+  <input type="text" id="assetName" placeholder="Enter asset name">
+
+  <label for="price">Price per Unit:</label>
+  <input type="number" id="price" placeholder="Enter price">
+
+  <label for="totalSupply">Total Supply:</label>
+  <input type="number" id="totalSupply" placeholder="Enter total supply">
+
+  <button onclick="calculateMarketCap()">Calculate Market Cap</button>
+  <button onclick="resetMarketCapCalculator()">Reset</button>
+
+  <div id="result" style="margin-top: 20px;"></div>
+
+  <button onclick="saveMarketCap()">Save Market Cap</button>
+</div>
+
+<script>
+  let totalPrices = 0;
+  let assetCount = 0;
+  const assetListElement = document.getElementById('assetList');
+  const avgPricesListElement = document.getElementById('avgPricesList');
+
+  function calculateAveragePrice() {
+    const avgAssetName = document.getElementById('avgAssetName').value;
+    const avgPrice = parseFloat(document.getElementById('avgPrice').value);
+
+    if (isNaN(avgPrice) || avgPrice <= 0) {
+      alert('Please enter a valid price.');
+      return;
+    }
+
+    totalPrices += avgPrice;
+    assetCount++;
+
+    const averagePrice = totalPrices / assetCount;
+    const formattedAveragePrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(averagePrice);
+
+    const avgResultElement = document.getElementById('avgResult');
+    avgResultElement.innerHTML = `<p>Average Price for ${assetCount} Assets: ${formattedAveragePrice}</p>`;
+
+    // Display the list of entered assets
+    const assetListItem = document.createElement('p');
+    assetListItem.textContent = `${avgAssetName}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(avgPrice)}`;
+    assetListElement.appendChild(assetListItem);
+  }
+
+  function resetAverageCalculator() {
+    totalPrices = 0;
+    assetCount = 0;
+    document.getElementById('avgResult').innerHTML = '';
+    document.getElementById('avgAssetName').value = '';
+    document.getElementById('avgPrice').value = '';
+    assetListElement.innerHTML = '';
+    avgPricesListElement.innerHTML = '';
+  }
+
+  function showAveragePrices() {
+    if (assetCount === 0) {
+      alert('Please add assets first.');
+      return;
+    }
+
+    avgPricesListElement.innerHTML = '<p>Average Prices:</p>';
+    const overallAverage = totalPrices / assetCount;
+
+    // Display the overall average
+    const formattedOverallAverage = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(overallAverage);
+    avgPricesListElement.innerHTML += `<p>Overall Average Price: ${formattedOverallAverage}</p>`;
+
+    // Display the individual asset prices
+    for (let i = 1; i <= assetCount; i++) {
+      const avgPricesListItem = document.createElement('p');
+      avgPricesListItem.textContent = `Asset ${i}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(avgPrice)}`;
+      avgPricesListElement.appendChild(avgPricesListItem);
+    }
+  }
+
+  function calculateMarketCap() {
+    const assetName = document.getElementById('assetName').value;
+    const price = parseFloat(document.getElementById('price').value);
+    const totalSupply = parseFloat(document.getElementById('totalSupply').value);
+
+    if (isNaN(price) || isNaN(totalSupply) || price <= 0 || totalSupply <= 0) {
+      alert('Please enter valid values for price and total supply.');
+      return;
+    }
+
+    const marketCap = price * totalSupply;
+    const formattedMarketCap = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(marketCap);
+
+    const resultElement = document.getElementById('result');
+    resultElement.innerHTML = `<p>${assetName} Market Cap: ${formattedMarketCap}</p>`;
+  }
+
+  function resetMarketCapCalculator() {
+    document.getElementById('assetName').value = '';
+    document.getElementById('price').value = '';
+    document.getElementById('totalSupply').value = '';
+    document.getElementById('result').innerHTML = '';
+  }
+
+  function saveMarketCap() {
+    const assetName = document.getElementById('assetName').value;
+    const price = parseFloat(document.getElementById('price').value);
+    const totalSupply = parseFloat(document.getElementById('totalSupply').value);
+
+    if (isNaN(price) || isNaN(totalSupply) || price <= 0 || totalSupply <= 0) {
+      alert('Please enter valid values for price and total supply.');
+      return;
+    }
+
+    const marketCap = price * totalSupply;
+    const formattedMarketCap = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(marketCap);
+
+    // Creating a Blob to save to local drive
+    const blob = new Blob([`${assetName} Market Cap: ${formattedMarketCap}`], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `${assetName}_MarketCap.txt`;
+    link.click();
+  }
+</script>
+
+</body>
+</html>
